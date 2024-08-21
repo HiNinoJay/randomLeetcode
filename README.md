@@ -23,5 +23,9 @@
 ## 运行截图
 ![](https://jsd.cdn.zzko.cn/gh/hininojay/images/source/img/a4color/getRandomLeetcode.jpg)
 
+## ☕️支持
+
+如果觉得我做的不错，请给该项目一个star，或者[请我喝杯咖啡☕️](https://ninojay.top/supportbymoney/)
+
 ## todo
 [ ]记录刷过的题，可重启项目继续
