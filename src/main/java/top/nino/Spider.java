@@ -1,5 +1,6 @@
 package top.nino;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import okhttp3.OkHttpClient;
@@ -20,11 +21,13 @@ public class Spider {
     private static final String PRFIX_LEETCODE_PROBLEM = "https://leetcode.cn/problems/";
     private static final String HOT_TOP_100_URL = "https://leetcode.cn/studyplan/top-100-liked/";
     private static final String HOT_100 = "hot-100";
+    private static final String PRE_INFO = "pre-info";
     private static final String JSON_SUFFIX = ".json";
     private static final String START_SCRIPT = "<script id=\"__NEXT_DATA__\" type=\"application/json\">";
     private static final String END_SCRIPT = "</script>";
     private static final String WINDOWS_PATH = "\\src\\main\\resources\\";
     private static final String MAX_PATH = "/src/main/resources/";
+    private static PreInfo preInfo = null;
     private OkHttpClient client;
 
     private Map<String, String> problemCache;
@@ -32,6 +35,7 @@ public class Spider {
     public Spider() {
         this.client = new OkHttpClient();
         this.problemCache = new HashMap<>();
+        preInfo = loadOldOrNew();
     }
 
     public String fetchHtml(String url) throws IOException {
@@ -94,7 +98,7 @@ public class Spider {
 
     }
 
-    private String getSystemPath() {
+    private static String getSystemPath() {
         String osName = System.getProperty("os.name").toLowerCase();
         if (osName.contains("win")) {
             return WINDOWS_PATH;
@@ -109,7 +113,6 @@ public class Spider {
     }
 
     private void writeLocalJson(String string, String title) {
-        getSystemPath();
         try {
             String prePath = Spider.class.getClassLoader().getResource("").getPath();
             String path = prePath.substring(0, prePath.indexOf("/target")) + getSystemPath();
@@ -130,6 +133,10 @@ public class Spider {
             write.close();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        if(preInfo.getSlug() == null || !preInfo.getSlug().equals(title)) {
+            preInfo.setSlug(title);
+            preInfo.setQuestionList(new ArrayList<>());
         }
     }
 
@@ -206,9 +213,15 @@ public class Spider {
             }
             break;
         }
+
+        if(preInfo.getSlug() != null) {
+            filterPastProblem(spider.problemCache);
+            System.out.println("已识别到刷过的题目量：" + preInfo.getQuestionList().size());
+        }
+
         int totalCount = spider.problemCache.size() % numberSize == 0 ? spider.problemCache.size() / numberSize : spider.problemCache.size() / numberSize + 1;
         int count = 0;
-        System.out.println("已采用一批的量为：" + numberSize + "(" + count + "/" + totalCount + ")");
+        System.out.println("已采用批量单位为：" + numberSize + " , 剩余进度：" +  "(" + count + "/" + totalCount + ")");
 
 
         Random random = new Random();
@@ -231,10 +244,54 @@ public class Spider {
                     continue;
                 }
                 System.out.println(key + ": " + spider.problemCache.get(key));
+                preInfo.getQuestionList().add(key);
                 spider.problemCache.remove(key);
             }
+            savePreInfo();
         }
         System.out.println();
         System.out.println("恭喜，已经通刷一遍。");
+    }
+
+    private static void filterPastProblem(Map<String, String> problemCache) {
+        if(preInfo.getQuestionList().size() < problemCache.size()) {
+            for(String key : preInfo.getQuestionList()) {
+                problemCache.remove(key);
+            }
+        } else {
+            preInfo.getQuestionList().clear();
+        }
+    }
+
+    private static void savePreInfo() {
+        try {
+            String prePath = Spider.class.getClassLoader().getResource("").getPath();
+            String path = prePath.substring(0, prePath.indexOf("/target")) + getSystemPath();
+
+            File file = new File(path + PRE_INFO + JSON_SUFFIX);
+
+            if(!file.exists()) {
+                // 创建文件
+                file.createNewFile();
+            }
+            // 写入文件
+            Writer write = new OutputStreamWriter(new FileOutputStream(file));
+            write.write(JSON.toJSONString(preInfo));
+            write.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static PreInfo loadOldOrNew() {
+        try {
+            InputStream inputStream = Spider.class.getClassLoader().getResourceAsStream(PRE_INFO + JSON_SUFFIX);
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            String jsonString = bufferedReader.lines().collect(Collectors.joining(""));
+            return JSON.parseObject(jsonString, PreInfo.class);
+        } catch (Exception e) {
+            System.out.println("载入之前的记录失败，新建一份。");
+        }
+        return new PreInfo();
     }
 }
