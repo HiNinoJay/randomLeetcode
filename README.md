@@ -22,3 +22,6 @@
 
 ## 运行截图
 ![](https://jsd.cdn.zzko.cn/gh/hininojay/images/source/img/a4color/randomLeetcode.jpg)
+
+## todo
+[ ]记录刷过的题，可重启项目继续
