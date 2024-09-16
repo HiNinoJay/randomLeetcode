@@ -22,7 +22,7 @@
 
 
 ## 运行截图
-![](https://jsd.cdn.zzko.cn/gh/hininojay/images/source/img/a4color/getRandomLeetcode.jpg)
+![](./src/main/resources/images/getRandomLeetcode.jpg)
 
 ## ☕️支持
 
