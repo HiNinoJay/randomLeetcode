@@ -207,7 +207,7 @@ public class Spider {
                 System.out.println("请输入数字。");
                 continue;
             }
-            if ( numberSize <= 0 || numberSize > 10) {
+            if ( numberSize <= 0 || numberSize > 20) {
                 System.out.println("请输入合理的范围。");
                 continue;
             }
