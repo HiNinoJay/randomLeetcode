@@ -37,3 +37,6 @@ build/
 ### Mac OS ###
 .DS_Store!/src/main/resources/pre-info.json
 !/.idea/
+.idea/git_toolbox_prj.xml
+src/main/.DS_Store
+src/main/resources/.DS_Store
